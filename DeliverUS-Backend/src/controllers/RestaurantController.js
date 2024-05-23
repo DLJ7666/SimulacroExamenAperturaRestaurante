@@ -95,12 +95,28 @@ const destroy = async function (req, res) {
   }
 }
 
+const online = async function (req, res) {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    if (restaurant.status === 'online') {
+      await Restaurant.update({ status: 'offline' }, { where: { id: req.params.restaurantId } })
+    } else if (restaurant.status === 'offline') {
+      await Restaurant.update({ status: 'online' }, { where: { id: req.params.restaurantId } })
+    } else { throw new Error('Restaurant status was closed or temporarily closed') }
+    const toggledRestaurant = await Restaurant.findByPk(req.params.restaurantId)
+    res.json(toggledRestaurant)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const RestaurantController = {
   index,
   indexOwner,
   create,
   show,
   update,
-  destroy
+  destroy,
+  online
 }
 export default RestaurantController
